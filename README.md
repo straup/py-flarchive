@@ -3,7 +3,7 @@
 ## What is this?
 
 py-flarchive is a very simple Python library for archiving the metadata for the
-Flickr photos for a user. For all a user's photos the library will try to
+Flickr photos belonging to a user. For all a user's photos the library will try to
 download and store the raw API (JSON) output for the following methods:
 
 * [flickr.photos.getInfo](http://www.flickr.com/services/api/flickr.photos.getInfo)
@@ -48,8 +48,14 @@ There are also a few helper `make` commands included with this with package:
 
 	$> make list-commons APIKEY=<APIKEY>
 
+## Caveats
+
+This has largely been optimized for public photo streams. It should work with
+private photos but there may still be bugs.
+
 ## TO DO
 
+* Clean up auth token handling
 * Pagination for photo comments
 * Packaging, setup scripts and general spit and polish
 

@@ -10,9 +10,9 @@ import pprint
 
 class flickr:
 
-    def __init__ (self, apikey, authtoken, datadir):
+    def __init__ (self, apikey, apisecret, datadir):
 
-        self.api = Flickr.API.API(apikey, authtoken)
+        self.api = Flickr.API.API(apikey, apisecret)
         self.datadir = datadir
 
         self.meta = {
@@ -23,7 +23,7 @@ class flickr:
             'e': 'flickr.photos.getExif',
         }
 
-    def archive_user(self, nsid):
+    def archive_user(self, nsid, token=None):
 
         logging.debug("archive %s" % nsid)
 
@@ -31,6 +31,7 @@ class flickr:
 
         args = {
             'user_id': nsid,
+            'auth_token': token
         }
         
         pages = None
@@ -42,7 +43,8 @@ class flickr:
         while not pages or page <= pages:
 
             args['page'] = page
-            # args['per_page'] = 1
+
+            logging.debug("fetching page %s (of %s) for %s" % (page, pages, nsid))
 
             try:
                 rsp = self.api_call(method, args)
@@ -56,11 +58,11 @@ class flickr:
                 logging.debug("%s photos (%s pages) for %s" % (total, pages, nsid))
 
             for ph in rsp['photos']['photo']:
-                self.archive_photo(ph)
+                self.archive_photo(ph, token)
 
             page += 1
 
-    def archive_photo(self, ph):
+    def archive_photo(self, ph, token=None):
 
         logging.info("process photo ID %s" % ph['id'])
 
@@ -86,7 +88,7 @@ class flickr:
 
         logging.debug("fetch meta for %s" % ", ".join(meta.values()))
 
-        for details in self.fetch_meta(ph, meta):
+        for details in self.fetch_meta(ph, meta, token):
 
             suffix, meta = details
 
@@ -102,16 +104,15 @@ class flickr:
             fh = open(path, 'w')
             json.dump(meta, fh)
 
-    # NOTE: this yields its results rather than returning a single list
-
-    def fetch_meta(self, ph, what):
+    def fetch_meta(self, ph, what, token=None):
 
         # TO DO: pagination on comments
 
         photo_id = ph['id']
         
         args = {
-            'photo_id': photo_id
+            'photo_id': photo_id,
+            'auth_token': token
         }
         
         for suffix, method in what.items():
@@ -121,6 +122,9 @@ class flickr:
             except Exception, e:
                 logging.error("failed to call %s: %s" % (method, e))
                 continue
+
+            # NOTE: see how this yields its results rather than returning
+            # a single list
 
             yield (suffix, rsp)
 
@@ -132,8 +136,26 @@ class flickr:
         args['format'] = 'json'
         args['nojsoncallback'] = 1
 
-        rsp = self.api.execute_method(method=method, args=args, sign=False)
-        return json.load(rsp)
+        sign = False
+
+        # So wrong... (20131220/straup)
+
+        if args.has_key('auth_token') and args['auth_token'] == None:
+            del(args['auth_token'])
+
+        if args.has_key('auth_token'):
+            sign = True
+
+        rsp = self.api.execute_method(method=method, args=args, sign=sign)
+        rsp = json.load(rsp)
+
+        stat = rsp.get('stat', False)
+
+        if stat != 'ok':
+            logging.warning("API call failed: %s" % rsp)
+            raise Exception, "API call failed"
+
+        return rsp
 
     def id2safedirs(self, id):
 
