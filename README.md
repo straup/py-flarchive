@@ -32,11 +32,14 @@ For example:
 	import flarchive
 
 	apikey='1234567'
-	authtoken=None
+	apisecret=None
 	datadir='/where/to/write/files'
 
-	fl = flarchive.flickr(apikey, authtoken, datadir)
-	fl.archive_user()        
+	nsid='9999@N01'
+	authtoken=None
+
+	fl = flarchive.flickr(apikey, apisecret, datadir)
+	fl.archive_user(nsid, authtoken)
 
 Or you can just call the flarchive `__init__.py` library from the command line:
 
