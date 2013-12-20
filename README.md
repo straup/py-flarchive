@@ -4,12 +4,12 @@
 
 py-flarchive is a very simple Python library for archiving the metadata for the
 Flickr photos for a user. For all a user's photos the library will try to
-download and store the raw API output for the following methods:
+download and store the raw API (JSON) output for the following methods:
 
 * [flickr.photos.getInfo](http://www.flickr.com/services/api/flickr.photos.getInfo)
 * [flickr.photos.getSizes](http://www.flickr.com/services/api/flickr.photos.getSizes)
 * [flickr.photos.comments.getList](http://www.flickr.com/services/api/flickr.photos.comments.getList)
-* [flickr.photos.getAllContexts]http://www.flickr.com/services/api/flickr.photos.getAllContexts)
+* [flickr.photos.getAllContexts](http://www.flickr.com/services/api/flickr.photos.getAllContexts)
 * [flickr.photos.getExif](http://www.flickr.com/services/api/flickr.photos.getExif)
 
 For example:
