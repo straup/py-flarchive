@@ -7,6 +7,7 @@ import Flickr.API
 import json
 import logging
 import pprint
+import time
 
 class flickr:
 
@@ -78,6 +79,10 @@ class flickr:
             
             path = os.path.join(root, fname)
 
+            # TO DO if exists check to see if json['flarchive:created']
+            #  is present and meets some criteria for retrieving the
+            # data again (20131221/straup)
+
             if not os.path.exists(path):
                 paths[suffix] = path
                 meta[suffix] = method
@@ -100,6 +105,8 @@ class flickr:
                 os.makedirs(root)
 
             logging.debug("writing %s" % path)
+
+            meta['flarchive:created'] = int(time.time())
 
             fh = open(path, 'w')
             json.dump(meta, fh)
@@ -194,12 +201,15 @@ class commons(flickr):
 
         return commons
 
-    def list_commons(self):
+    def list_commons(self, raw=False):
 
         commons = self.commons_institutions()
 
         if not commons:
             return False
+
+        if raw:
+            return commons
 
         for nsid, name in commons.items():
             print "%s\t%s" % (nsid, name)
